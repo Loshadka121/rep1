@@ -126,14 +126,42 @@ std::ostream& operator<<(std::ostream& os, Rational number) {
   return os;
 }
 std::istream& operator>>(std::istream& is, Rational number) {
-  int c, d = 1;
-  char slash;
-  std::cin >> c;
+  char str[101];
+  str[100] = '\0';
+  bool is_minus = false;
+  is >> str;
+  int c = 0, d = 0, len = strlen(str), i;
+  for (i = 0; i < len; ++i) {
+    if (str[i] == '-') {
+      is_minus = !is_minus;
+    }
+    else if (str[i] == '+') {
+      continue;
+    }
+    else if (str[i] != '/') {
+      c = c * 10 + (str[i] - '0');
+    }
+    else {
+      ++i;
+      break;
+    }
+  }
+  if (i == len) {
+    d = 1;
+  }
+  for (; i < len; ++i) {
+    if (str[i] == '-') {
+      is_minus = !is_minus;
+    }
+    else if (str[i] != '+') {
+      d = d * 10 + (str[i] - '0');
+    }
+  }
+  if (is_minus) {
+    c = -c;
+  }
   number.SetB(1);
   number.SetA(c);
-  if (std::cin >> slash) {
-    std::cin >> d;
-  }
   number.SetB(d);
   return is;
 }
