@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 
 class RationalDivZero : public std::exception {};
 
@@ -114,6 +115,24 @@ public:
     this->b = b;
     Reduce();
   }
+
+  int NumFromStr(char str[], int left, int right) {
+    int number = 0;
+    int d = 1;
+    bool is_minus = false;
+
+    if (str[0] == '-') {
+      is_minus = true;
+    }
+    else if (str[0] != '+') {
+      d = 0;
+    }
+
+    for (int i = a + d; i < b; ++i) {
+      number = (number * 10) + (str[i] - '0');
+    }
+    return (is_minus ? -number : number);
+  }
 };
 
 std::ostream& operator<<(std::ostream& os, Rational number) {
@@ -126,43 +145,24 @@ std::ostream& operator<<(std::ostream& os, Rational number) {
   return os;
 }
 std::istream& operator>>(std::istream& is, Rational number) {
-  char str[101];
-  str[100] = '\0';
+  char str[100];
+  for (int i = 0; i < 100; ++i) {
+    str[i] = '\0' ;
+  }
+  int len = strlen(str);
   bool is_minus = false;
   is >> str;
-  int c = 0, d = 0, len = strlen(str), i;
-  for (i = 0; i < len; ++i) {
-    if (str[i] == '-') {
-      is_minus = !is_minus;
-    }
-    else if (str[i] == '+') {
-      continue;
-    }
-    else if (str[i] != '/') {
-      c = c * 10 + (str[i] - '0');
-    }
-    else {
-      ++i;
+  int i_slash;
+  for (int i = 0; i < len; ++i) {
+    if (str[i] == '/') {
+      i_slash = i;
       break;
     }
   }
-  if (i == len) {
-    d = 1;
-  }
-  for (; i < len; ++i) {
-    if (str[i] == '-') {
-      is_minus = !is_minus;
-    }
-    else if (str[i] != '+') {
-      d = d * 10 + (str[i] - '0');
-    }
-  }
-  if (is_minus) {
-    c = -c;
-  }
-  number.SetB(1);
-  number.SetA(c);
-  number.SetB(d);
+
+  number.SetA(number.NumFromStr(str, 0, i_slash));
+  number.SetB(number.NumFromStr(str, i_slash + 1, len));
+
   return is;
 }
 
