@@ -1,31 +1,26 @@
 #include <iostream>
 #include <cstring>
+#include <stdexcept>
+#include "rational.h"
 
-class RationalDivZero : public std::exception {};
-
-class Rational {
-private:
-  int a = 1;
-  int b = 1;
-
-  int GCD(int a, int b) {
-    while (a != 0 and b != 0) {
-      if (a > b) {
-        a = a % b;
-      } else {
-        b = b % a;
-      }
+int Rational::GCD(int32_t a, int32_t b) {
+  while (a != 0 and b != 0) {
+    if (a > b) {
+      a = a % b;
     }
-    return (a + b);
+    else {
+      b = b % a;
+    }
   }
-  void Reduce() {
-    int gcd = GCD(a, b);
-    a /= gcd;
-    b /= gcd;
-  }
+  return (a + b);
+}
+void Rational::Reduce() {
+  int32_t gcd = GCD(a, b);
+  a /= gcd;
+  b /= gcd;
+}
 
-public:
-  Rational(int a = 0, int b = 1) {
+ Rational::Rational(int32_t a = 0, int32_t b = 1) {
     this->a = a;
     this->b = b;
 
@@ -35,89 +30,89 @@ public:
       this->b = -b;
     }
   }
-  Rational(const Rational& r) {
+  Rational::Rational(const Rational& r) {
     a = r.a;
     b = r.b;
   }
 
-  double Dec() {
-    double dec_a = a;
-    double dec_b = b;
-    return dec_a / dec_b;
-  }
+  // double Rational::Dec() {
+  //   double dec_a = a;
+  //   double dec_b = b;
+  //   return dec_a / dec_b;
+  // }
 
-  Rational& operator+=(const Rational& other) {
+  Rational& Rational::operator+=(const Rational& other) {
     a = a * other.b + b * other.a;
     b = b * other.b;
     Reduce();
     return *this;
   }
-  Rational& operator-=(const Rational& other) {
+  Rational& Rational::operator-=(const Rational& other) {
     a = a * other.b - b * other.a;
     b = b * other.b;
     Reduce();
     return *this;
   }
-  Rational& operator*=(const Rational& other) {
+  Rational& Rational::operator*=(const Rational& other) {
     a = a * other.a;
     b = b * other.b;
     Reduce();
     return *this;
   }
-  Rational& operator/=(const Rational& other) {
+  Rational& Rational::operator/=(const Rational& other) {
     a = a * other.b;
     b = b * other.a;
     Reduce();
     return *this;
   }
 
-  Rational& operator++() {
+  Rational& Rational::operator++() {
     a += b;
     return *this;
   }
-  Rational operator++(int) {
+  Rational Rational::operator++(int) {
     Rational copy(a, b);
     a += b;
     return copy;
   }
-  Rational& operator--() {
+  Rational& Rational::operator--() {
     a -= b;
     return *this;
   }
-  Rational operator--(int) {
+  Rational Rational::operator--(int) {
     Rational copy(a, b);
     a -= b;
     return copy;
   }
-  Rational operator-() {
+  Rational Rational::operator-() {
     Rational opposite(-a, b);
     return opposite;
   }
-  Rational operator+() {
+  Rational Rational::operator+() {
     Rational number(a, b);
     return number;
   }
 
-  int GetA() const {
+  int Rational::GetNumerator() const {
     return a;
   }
-  int GetB() const {
+  int Rational::GetDenominator() const {
     return b;
   }
-  void SetA(int a) {
+  void Rational::SetNumerator(int32_t a) {
     this->a = a;
     Reduce();
   }
-  void SetB(int b) {
+  void Rational::SetDenominator(int32_t b) {
     if (b == 0) {
-      throw RationalDivZero();
+      throw RationalDivisionByZero();
     }
     this->b = b;
     Reduce();
   }
 
-  int NumFromStr(char str[], int left, int right) {
-    int number = 0;
+  int Rational::NumFromStr(char str[], int left, int right) {
+    int32_t number = 0;
     int d = 1;
     bool is_minus = false;
 
@@ -133,25 +128,27 @@ public:
     }
     return (is_minus ? -number : number);
   }
-};
+
+///////////////////////
 
 std::ostream& operator<<(std::ostream& os, Rational number) {
-  if (number.GetB() == 1) {
-    os << number.GetA();
+  if (number.GetDenominator() == 1) {
+    os << number.GetNumerator();
   }
   else {
-    os << number.GetA() << "/" << number.GetB();
+    os << number.GetNumerator() << "/" << number.GetDenominator();
   }
   return os;
 }
+
 std::istream& operator>>(std::istream& is, Rational number) {
   char str[100];
   for (int i = 0; i < 100; ++i) {
-    str[i] = '\0' ;
+    str[i] = '\0';
   }
-  int len = strlen(str);
   bool is_minus = false;
   is >> str;
+  int len = strlen(str);
   int i_slash;
   for (int i = 0; i < len; ++i) {
     if (str[i] == '/') {
@@ -160,8 +157,8 @@ std::istream& operator>>(std::istream& is, Rational number) {
     }
   }
 
-  number.SetA(number.NumFromStr(str, 0, i_slash));
-  number.SetB(number.NumFromStr(str, i_slash + 1, len));
+  number.SetNumerator(number.NumFromStr(str, 0, i_slash));
+  number.SetDenominator(number.NumFromStr(str, i_slash + 1, len));
 
   return is;
 }
@@ -188,7 +185,7 @@ Rational operator/(const Rational& number, const Rational& other) {
 }
 
 bool operator<(const Rational& left, const Rational& right) {
-  return left.GetA() * right.GetB() < right.GetA() * left.GetB();
+  return left.GetNumerator() * right.GetDenominator() < right.GetNumerator() * left.GetDenominator();
 }
 bool operator>(const Rational& left, const Rational& right) {
   return right < left;
@@ -203,17 +200,6 @@ bool operator>=(const Rational& left, const Rational& right) {
   return !(left > right or left == right);
 }
 
-int main() {
-
-  Rational r, l;
-  std::cin >> r;
-  std::cin >> l;
-
-  std::cout << r << ' ' << l << '\n';
-
-
-  return 0;
-}
 Footer
 © 2023 GitHub, Inc.
 Footer navigation
