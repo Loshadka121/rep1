@@ -38,9 +38,9 @@ class UniquePtr {
     ptr_ = new_ptr;
   }
   void Swap(UniquePtr<T>& other) {
-    T* temp = std::move(ptr_);
-    ptr_ = std::move(other.ptr_);
-    other.ptr_ = std::move(temp);
+    UniquePtr temp = std::move(other);
+    other = std::move(*this);
+    *this = std::move(temp);
   }
 
   T& operator*() const {
