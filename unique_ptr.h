@@ -56,6 +56,10 @@ class UniquePtr {
   explicit operator bool() const {
     return ptr_ != nullptr;
   }
+
+  ~UniquePtr() {
+    delete ptr_;
+  }
 };
 
 #endif
